@@ -6,11 +6,8 @@ function ZeroLumen() {
   const [lumenResponse, setLumenResponse] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleAsk = async () => {
-    if (!input.trim()) return;
-    setLoading(true);
-
-    const fetchResponse = async (persona) => {
+  const fetchResponse = async (persona) => {
+    try {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: {
@@ -24,38 +21,48 @@ function ZeroLumen() {
 
       const data = await res.json();
       return data.result || "응답 오류";
-    };
-
-    try {
-      const [zero, lumen] = await Promise.all([
-        fetchResponse("제로"),
-        fetchResponse("루멘")
-      ]);
-
-      setZeroResponse(zero);
-      setLumenResponse(lumen);
     } catch (error) {
-      setZeroResponse("Zero 응답 오류");
-      setLumenResponse("Lumen 응답 오류");
+      console.error(`${persona} fetch 실패`, error);
+      return `${persona} 응답 오류`;
     }
+  };
 
+  const handleAsk = async () => {
+    if (!input.trim()) return;
+    setLoading(true);
+    setZeroResponse("");
+    setLumenResponse("");
+
+    const [zero, lumen] = await Promise.all([
+      fetchResponse("제로"),
+      fetchResponse("루멘")
+    ]);
+
+    setZeroResponse(zero);
+    setLumenResponse(lumen);
     setLoading(false);
   };
 
   return (
-    <div>
+    <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
+      <h2>제로 vs 루멘 대화</h2>
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="주제를 입력하세요"
         style={{ padding: "8px", width: "60%" }}
       />
-      <button onClick={handleAsk} disabled={loading} style={{ marginLeft: "8px" }}>
+      <button
+        onClick={handleAsk}
+        disabled={loading}
+        style={{ marginLeft: "8px", padding: "8px" }}
+      >
         {loading ? "로딩 중..." : "보내기"}
       </button>
+
       <div style={{ marginTop: "20px" }}>
-        <p><strong>Zero:</strong> {zeroResponse}</p>
-        <p><strong>Lumen:</strong> {lumenResponse}</p>
+        <p><strong>영:</strong> {zeroResponse}</p>
+        <p><strong>루멘:</strong> {lumenResponse}</p>
       </div>
     </div>
   );
