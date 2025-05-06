@@ -7,37 +7,52 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState('both');
   const [showIntro, setShowIntro] = useState(true);
+  const [zeroMemory, setZeroMemory] = useState([]);
+  const [lumenMemory, setLumenMemory] = useState([]);
   const scrollRef = useRef(null);
 
-  const fetchAnswer = async (persona) => {
+  const fetchAnswer = async (persona, memory, setMemory) => {
     const res = await fetch('/api/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input, persona })
+      body: JSON.stringify({ input, persona, memory })
     });
 
     const data = await res.json();
-    return data.result || '[응답 없음] GPT 결과 파싱 실패';
+    const reply = data.result || '[응답 없음]';
+
+    // 기억 누적
+    setMemory(prev => [
+      ...prev,
+      { role: 'user', content: input },
+      { role: 'assistant', content: reply }
+    ]);
+
+    return reply;
   };
 
   const handleAsk = async () => {
     if (!input.trim()) return;
     setLoading(true);
-    setShowIntro(false); // 첫 입력 시 소개 카드 숨김
+    setShowIntro(false); // 소개카드 숨김
 
     let results = [];
+
     if (selectedPersona === 'both') {
       const [zero, lumen] = await Promise.all([
-        fetchAnswer('제로'),
-        fetchAnswer('루멘')
+        fetchAnswer('제로', zeroMemory, setZeroMemory),
+        fetchAnswer('루멘', lumenMemory, setLumenMemory)
       ]);
       results = [
         { persona: '제로', answer: zero },
         { persona: '루멘', answer: lumen }
       ];
+    } else if (selectedPersona === '제로') {
+      const zero = await fetchAnswer('제로', zeroMemory, setZeroMemory);
+      results = [{ persona: '제로', answer: zero }];
     } else {
-      const answer = await fetchAnswer(selectedPersona);
-      results = [{ persona: selectedPersona, answer }];
+      const lumen = await fetchAnswer('루멘', lumenMemory, setLumenMemory);
+      results = [{ persona: '루멘', answer: lumen }];
     }
 
     setMessages(prev => [...prev, { input, results }]);
