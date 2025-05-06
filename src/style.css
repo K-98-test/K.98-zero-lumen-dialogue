@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: 'Pretendard', sans-serif;
-  background: #f8f9fa;
+  background: #f7f8fa;
 }
 
 .container {
@@ -12,10 +12,11 @@ body {
 
 h1 {
   text-align: center;
+  color: #222;
   margin-bottom: 1.5rem;
 }
 
-.input-section {
+.input-row {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
@@ -25,6 +26,8 @@ input {
   flex: 1;
   padding: 10px;
   font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
 button {
@@ -33,12 +36,12 @@ button {
   background: #007bff;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-.dialogue-container {
-  max-height: 60vh;
+.dialogue-area {
+  max-height: 65vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -46,34 +49,27 @@ button {
 }
 
 .dialogue-block {
-  border: 1px solid #ddd;
+  background: #fff;
+  padding: 16px;
   border-radius: 10px;
-  padding: 10px;
-  background: white;
+  box-shadow: 0 0 4px rgba(0,0,0,0.08);
 }
 
-.topic {
+.question {
   font-weight: bold;
-  margin-bottom: 10px;
-  text-align: center;
+  margin-bottom: 8px;
 }
 
-.response-row {
-  display: flex;
-  gap: 10px;
-}
-
-.zero, .lumen {
-  flex: 1;
-  padding: 10px;
+.answer-card {
+  padding: 12px;
   border-radius: 8px;
   white-space: pre-wrap;
 }
 
 .zero {
-  background: #e8f0ff;
+  background: #e0edff;
 }
 
 .lumen {
-  background: #fff3d8;
+  background: #fff3d6;
 }
