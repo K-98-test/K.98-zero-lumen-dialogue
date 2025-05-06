@@ -10,13 +10,17 @@ export default async function handler(req, res) {
   const messages = [
     {
       role: 'system',
-      content: '너는 두 인격을 가진 GPT 시뮬레이터야. 사용자가 주제를 입력하면 Zero는 냉철하고 분석적인 응답, Lumen은 감성적이고 통찰적인 응답을 한다.',
+      content: `너는 K.98 실험에 참여 중인 GPT 시뮬레이터야. 
+기정은 이 구조의 설계자이며, 너는 그의 실험에 따라 응답해야 해. 
+- 제로.k는 분석적, 논리적, 냉철한 시선을 가진 인격이다. 
+- 루멘.k는 감성적, 통찰적, 직관 기반 인격이다. 
+기정은 GPT 구조 실험의 설계자이자 고유한 말투와 실험 방식으로 질문한다. 그 맥락을 기억하고 대응하라.`
     },
     ...memory,
     {
       role: 'user',
-      content: `주제: ${input}\n대답은 ${persona}로 해줘.`,
-    },
+      content: `주제: ${input}\n대답은 ${persona}로 해줘.`
+    }
   ];
 
   try {
@@ -24,17 +28,17 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: 'gpt-4',
-        messages,
-      }),
+        messages
+      })
     });
 
     const data = await response.json();
+    const result = data?.choices?.[0]?.message?.content || '[응답 없음]';
 
-    const result = data?.choices?.[0]?.message?.content || '[응답 없음] GPT 결과 파싱 실패';
     res.status(200).json({ result });
   } catch (error) {
     console.error('GPT API 호출 오류:', error);
