@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 function App() {
   const [input, setInput] = useState("");
-  const [zeroResponse, setZeroResponse] = useState("");
-  const [lumenResponse, setLumenResponse] = useState("");
+  const [zeroHistory, setZeroHistory] = useState([]);
+  const [lumenHistory, setLumenHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const scrollRef = useRef(null);
 
   const fetchResponse = async (persona) => {
     try {
@@ -13,9 +14,8 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ input, persona })
       });
-
       const data = await res.json();
-      return data.result || "응답 오류";
+      return data.result || `${persona} 응답 오류`;
     } catch {
       return `${persona} 응답 오류`;
     }
@@ -24,27 +24,34 @@ function App() {
   const handleAsk = async () => {
     if (!input.trim()) return;
     setLoading(true);
-    setZeroResponse("");
-    setLumenResponse("");
 
     const [zero, lumen] = await Promise.all([
       fetchResponse("제로"),
       fetchResponse("루멘")
     ]);
 
-    setZeroResponse(zero);
-    setLumenResponse(lumen);
+    setZeroHistory(prev => [...prev, { q: input, a: zero }]);
+    setLumenHistory(prev => [...prev, { q: input, a: lumen }]);
+
+    setInput("");
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [zeroHistory, lumenHistory]);
 
   return (
     <div style={{
       fontFamily: "sans-serif",
-      maxWidth: "600px",
+      maxWidth: "800px",
       margin: "40px auto",
       padding: "20px"
     }}>
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>제로 vs 루멘 대화</h2>
+
       <div style={{ display: "flex", gap: "10px" }}>
         <input
           value={input}
@@ -73,30 +80,55 @@ function App() {
         </button>
       </div>
 
-      <div style={{ marginTop: "30px", display: "flex", flexDirection: "column", gap: "20px" }}>
-        <div style={{
-          background: "#f1f1f1",
-          padding: "16px",
-          borderRadius: "10px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.1)"
-        }}>
-          <strong>제로:</strong>
-          <p style={{ marginTop: "8px", whiteSpace: "pre-wrap" }}>
-            {loading && !zeroResponse ? "제로 응답 생성 중..." : zeroResponse}
-          </p>
-        </div>
-
-        <div style={{
-          background: "#fffbe6",
-          padding: "16px",
-          borderRadius: "10px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.1)"
-        }}>
-          <strong>루멘:</strong>
-          <p style={{ marginTop: "8px", whiteSpace: "pre-wrap" }}>
-            {loading && !lumenResponse ? "루멘 응답 생성 중..." : lumenResponse}
-          </p>
-        </div>
+      <div ref={scrollRef} style={{
+        marginTop: "30px",
+        maxHeight: "500px",
+        overflowY: "auto",
+        paddingRight: "10px"
+      }}>
+        {zeroHistory.map((item, idx) => (
+          <div key={idx} style={{
+            marginBottom: "20px",
+            border: "1px solid #eee",
+            borderRadius: "10px",
+            padding: "12px"
+          }}>
+            <div style={{
+              textAlign: "center",
+              fontWeight: "bold",
+              marginBottom: "12px"
+            }}>
+              주제: {item.q}
+            </div>
+            <div style={{
+              display: "flex",
+              gap: "12px"
+            }}>
+              <div style={{
+                flex: 1,
+                background: "#f1f1f1",
+                borderRadius: "10px",
+                padding: "10px"
+              }}>
+                <strong>제로</strong>
+                <p style={{ whiteSpace: "pre-wrap", marginTop: "6px" }}>
+                  {zeroHistory[idx]?.a}
+                </p>
+              </div>
+              <div style={{
+                flex: 1,
+                background: "#fffbe6",
+                borderRadius: "10px",
+                padding: "10px"
+              }}>
+                <strong>루멘</strong>
+                <p style={{ whiteSpace: "pre-wrap", marginTop: "6px" }}>
+                  {lumenHistory[idx]?.a}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
