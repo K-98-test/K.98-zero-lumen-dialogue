@@ -1,29 +1,50 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-const dialogues = [
-  { speaker: "Zero", text: "천재가 사라진 게 아니야. 지금 기준이 후퇴했을 뿐이야." },
-  { speaker: "Lumen", text: "그건 기준 탓이 아니야. 시대마다 요구되는 창의성이 다를 뿐이지." },
-  { speaker: "Zero", text: "하지만 우리가 천재라 부른 인물들은 지금보다 더 넓은 지형을 개척했지." },
-  { speaker: "Lumen", text: "그건 정보가 희소했던 시대였기에 가능했던 일일 수도 있어." }
-];
+function App() {
+  const [topic, setTopic] = useState('');
+  const [submittedTopic, setSubmittedTopic] = useState('');
 
-const ZeroLumen = () => {
-  const [index, setIndex] = useState(0);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmittedTopic(topic.trim());
+  };
 
-  const nextDialogue = () => {
-    if (index < dialogues.length - 1) {
-      setIndex(index + 1);
-    }
+  const getZeroResponse = (topic) => {
+    if (!topic) return '';
+    return `Zero: "${topic}"에 대해 감정은 배제하고 본질에 집중해야 합니다.`;
+  };
+
+  const getLumenResponse = (topic) => {
+    if (!topic) return '';
+    return `Lumen: "${topic}"은(는) 당신의 감정이 중요합니다. 스스로를 돌보세요.`;
   };
 
   return (
-    <div>
-      <p><strong>{dialogues[index].speaker}:</strong> {dialogues[index].text}</p>
-      {index < dialogues.length - 1 && (
-        <button onClick={nextDialogue}>다음</button>
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1>제로 vs 루멘 대화</h1>
+      {!submittedTopic ? (
+        <form onSubmit={handleSubmit}>
+          <label>주제를 입력하세요:</label>
+          <br />
+          <input
+            type="text"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            style={{ width: '300px', padding: '0.5rem', marginTop: '0.5rem' }}
+          />
+          <br />
+          <button type="submit" style={{ marginTop: '1rem' }}>대화 시작</button>
+        </form>
+      ) : (
+        <div>
+          <p><strong>입력 주제:</strong> {submittedTopic}</p>
+          <p>{getZeroResponse(submittedTopic)}</p>
+          <p>{getLumenResponse(submittedTopic)}</p>
+          <button onClick={() => { setTopic(''); setSubmittedTopic(''); }}>다시 시작</button>
+        </div>
       )}
     </div>
   );
-};
+}
 
-export default ZeroLumen;
+export default App;
