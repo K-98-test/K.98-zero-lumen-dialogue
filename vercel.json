@@ -1,3 +1,4 @@
 {
-  "framework": "create-react-app"
+  "buildCommand": "vite build",
+  "outputDirectory": "dist"
 }
