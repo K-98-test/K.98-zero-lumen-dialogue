@@ -2,7 +2,9 @@ const fetch = require("node-fetch");
 
 module.exports = async (req, res) => {
   try {
-    const { input, persona } = JSON.parse(req.body);
+    const { input, persona } = typeof req.body === "string"
+      ? JSON.parse(req.body)
+      : req.body;
 
     const messages = [
       {
@@ -29,6 +31,7 @@ module.exports = async (req, res) => {
 
     const data = await response.json();
     const answer = data.choices?.[0]?.message?.content || "응답 없음";
+
     res.status(200).json({ result: answer });
   } catch (err) {
     console.error("OpenAI API 오류:", err);
