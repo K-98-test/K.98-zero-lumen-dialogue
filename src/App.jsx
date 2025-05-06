@@ -5,6 +5,8 @@ function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState('both');
+  const [showIntro, setShowIntro] = useState(true);
   const scrollRef = useRef(null);
 
   const fetchAnswer = async (persona) => {
@@ -21,21 +23,24 @@ function App() {
   const handleAsk = async () => {
     if (!input.trim()) return;
     setLoading(true);
+    setShowIntro(false); // 첫 입력 시 소개 카드 숨김
 
-    const persona = input.startsWith('제로:') ? '제로'
-                   : input.startsWith('루멘:') ? '루멘'
-                   : null;
-
-    if (!persona) {
-      alert('제로: 또는 루멘: 으로 시작해 주세요');
-      setLoading(false);
-      return;
+    let results = [];
+    if (selectedPersona === 'both') {
+      const [zero, lumen] = await Promise.all([
+        fetchAnswer('제로'),
+        fetchAnswer('루멘')
+      ]);
+      results = [
+        { persona: '제로', answer: zero },
+        { persona: '루멘', answer: lumen }
+      ];
+    } else {
+      const answer = await fetchAnswer(selectedPersona);
+      results = [{ persona: selectedPersona, answer }];
     }
 
-    const cleanInput = input.replace(/^제로:|^루멘:/, '').trim();
-    const answer = await fetchAnswer(persona);
-
-    setMessages(prev => [...prev, { persona, question: cleanInput, answer }]);
+    setMessages(prev => [...prev, { input, results }]);
     setInput('');
     setLoading(false);
   };
@@ -48,25 +53,48 @@ function App() {
 
   return (
     <div className="container">
-      <h1>K.98 실험: 제로 vs 루멘</h1>
+      <h1>K.98 인격 실험</h1>
+
+      <div className="top-bar">
+        <div className="persona-toggle">
+          <button onClick={() => setSelectedPersona('제로')} className={selectedPersona === '제로' ? 'active' : ''}>제로</button>
+          <button onClick={() => setSelectedPersona('루멘')} className={selectedPersona === '루멘' ? 'active' : ''}>루멘</button>
+          <button onClick={() => setSelectedPersona('both')} className={selectedPersona === 'both' ? 'active' : ''}>둘 다</button>
+        </div>
+        <button className="intro-toggle" onClick={() => setShowIntro(true)}>👤 인격 소개 보기</button>
+      </div>
+
+      {showIntro && (
+        <div className="intro-card">
+          <h3>인격 소개</h3>
+          <p><strong>제로:</strong> 논리적이고 냉철하며 분석 중심의 GPT 인격.</p>
+          <p><strong>루멘:</strong> 감성적이고 직관적이며 통찰 중심의 GPT 인격.</p>
+          <p>하단 입력창에서 질문 후 인격을 선택하여 실험을 시작하세요.</p>
+        </div>
+      )}
+
       <div className="input-row">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="제로: 인간의 본질은? 또는 루멘: 감정이란?"
+          placeholder="질문을 입력하세요"
         />
         <button onClick={handleAsk} disabled={loading}>
-          {loading ? '생성 중...' : '보내기'}
+          {loading ? '응답 중...' : '보내기'}
         </button>
       </div>
 
       <div className="dialogue-area" ref={scrollRef}>
         {messages.map((msg, idx) => (
           <div key={idx} className="dialogue-block">
-            <div className="question">💬 질문: {msg.question}</div>
-            <div className={`answer-card ${msg.persona === '제로' ? 'zero' : 'lumen'}`}>
-              <strong>{msg.persona}</strong>
-              <p>{msg.answer}</p>
+            <div className="question">💬 질문: {msg.input}</div>
+            <div className="answer-row">
+              {msg.results.map((r, i) => (
+                <div key={i} className={`answer-card ${r.persona === '제로' ? 'zero' : 'lumen'}`}>
+                  <strong>{r.persona}</strong>
+                  <p>{r.answer}</p>
+                </div>
+              ))}
             </div>
           </div>
         ))}
