@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
       ? JSON.parse(req.body)
       : req.body;
 
-    console.log("📝 입력 받은 내용:", input, "인격:", persona);
+    console.log("📝 입력 받은 내용:", input, " | 인격:", persona);
 
     const messages = [
       {
@@ -34,13 +34,21 @@ module.exports = async (req, res) => {
     });
 
     const data = await response.json();
-    const answer = data.choices?.[0]?.message?.content || "응답 없음";
 
-    console.log("✅ GPT 응답 수신 완료");
-    res.status(200).json({ result: answer });
+    console.log("📦 GPT 응답 전체:", JSON.stringify(data, null, 2));
+
+    const answer = data.choices?.[0]?.message?.content;
+
+    if (answer) {
+      console.log("✅ GPT 응답 추출 완료");
+      res.status(200).json({ result: answer });
+    } else {
+      console.warn("⚠️ GPT 응답 없음 또는 예상 구조 아님");
+      res.status(200).json({ result: "[응답 없음] GPT 결과 파싱 실패" });
+    }
 
   } catch (err) {
-    console.error("❌ OpenAI API 오류:", err);
-    res.status(500).json({ error: "서버 오류" });
+    console.error("❌ GPT 호출 또는 파싱 오류:", err);
+    res.status(500).json({ error: "서버 오류 발생" });
   }
 };
