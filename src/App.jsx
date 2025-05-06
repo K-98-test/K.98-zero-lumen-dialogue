@@ -41,7 +41,7 @@ function App() {
         {loading ? "로딩 중..." : "보내기"}
       </button>
       <div style={{ marginTop: 20 }}>
-        <p><strong>영:</strong> {zeroResponse}</p>
+        <p><strong>제로:</strong> {zeroResponse}</p>
         <p><strong>루멘:</strong> {lumenResponse}</p>
       </div>
     </div>
