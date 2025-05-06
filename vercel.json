@@ -16,7 +16,10 @@
       "dest": "api/ask.js"
     },
     {
-      "src": "/(.*)",
+      "handle": "filesystem"
+    },
+    {
+      "src": "/.*",
       "dest": "/index.html"
     }
   ]
