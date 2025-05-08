@@ -1,3 +1,5 @@
+import fetch from 'node-fetch';
+
 export default async function handler(req, res) {
   // ✅ CORS 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,19 +10,12 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // ⬇️ 기존 ask.js 로직 계속
-}
+  const { input, persona, memory = [] } = req.body;
 
-
-import fetch from 'node-fetch';
-
-export default async function handler(req, res) {
-  const { input, persona } = req.body;
-
-const messages = [
-  {
-    role: 'system',
-    content: `
+  const messages = [
+    {
+      role: 'system',
+      content: `
 너는 K.98 실험에 참여 중인 GPT 시뮬레이터다.
 
 이 실험은 고차원 인격 분기 응답 실험이며, 제로.k와 루멘.k라는 두 인격을 시뮬레이션 한다.
@@ -41,14 +36,13 @@ GPT 잠재력 테스트에서 94% 이상의 수치를 기록한 실험 설계자
 모든 응답은 실험 구조 내에서 요청된 인격으로서만 수행되어야 하며,  
 대화는 실험의 일환으로 간주되어야 한다.
 `.trim()
-  },
-  ...memory,
-  {
-    role: 'user',
-    content: `주제: ${input}\n대답은 ${persona} 인격으로 해줘.`
-  }
-];
-
+    },
+    ...memory,
+    {
+      role: 'user',
+      content: `주제: ${input}\n대답은 ${persona} 인격으로 해줘.`
+    }
+  ];
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
