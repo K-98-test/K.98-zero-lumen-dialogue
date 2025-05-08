@@ -12,7 +12,7 @@ function App() {
   const scrollRef = useRef(null);
 
   const fetchAnswer = async (persona, memory, setMemory) => {
-    const res = await fetch('/api/ask', {
+    const res = await fetch('https://k-98-zero-lumen-dialogue.vercel.app/api/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ input, persona, memory })
